@@ -3,97 +3,85 @@ function initCube() {
   container.innerHTML = "";
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(
-    75,
-    container.clientWidth / container.clientHeight,
-    0.1,
-    1000
-  );
-
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  const camera = new THREE.PerspectiveCamera(75, container.clientWidth/container.clientHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ antialias:true });
   renderer.setSize(container.clientWidth, container.clientHeight);
   container.appendChild(renderer.domElement);
 
-  // Cube labels + page mapping
   const labels = [
-    { text: "Projects", page: "projects.html" },
-    { text: "Skills", page: "skills.html" },
-    { text: "Experience", page: "experience.html" },
-    { text: "Education", page: "education.html" },
-    { text: "About", page: "about.html" },
-    { text: "Contact", page: "contact.html" }
+    { text:"Projects", target:"projects" },
+    { text:"Skills", target:"skills" },
+    { text:"About", target:"projects" },
+    { text:"Resume", target:"projects" },
+    { text:"Contact", target:"projects" },
+    { text:"Education", target:"projects" }
   ];
 
-  // Create cube face textures
-  const materials = labels.map(label => {
-    const canvas = document.createElement("canvas");
-    canvas.width = canvas.height = 256;
-    const ctx = canvas.getContext("2d");
+  const materials = labels.map(l => {
+    const c=document.createElement("canvas");
+    c.width=c.height=512;
+    const ctx=c.getContext("2d");
 
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, 256, 256);
+    const g=ctx.createLinearGradient(0,0,512,512);
+    g.addColorStop(0,"#001f3f");
+    g.addColorStop(1,"#003366");
+    ctx.fillStyle=g;
+    ctx.fillRect(0,0,512,512);
 
-    ctx.fillStyle = "#00ffff";
-    ctx.font = "bold 28px 'Press Start 2P'";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(label.text, 128, 128);
+    ctx.fillStyle="gold";
+    ctx.font="bold 48px 'Press Start 2P', monospace";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText(l.text,256,256);
 
-    return new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas) });
+    return new THREE.MeshStandardMaterial({
+      map:new THREE.CanvasTexture(c),
+      metalness:0.7,
+      roughness:0.2
+    });
   });
 
-  const cube = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 1.5), materials);
+  const cube = new THREE.Mesh(new THREE.BoxGeometry(2,2,2), materials);
   scene.add(cube);
-  camera.position.z = 3;
 
-  // Rotation
-  let spinX = 0, spinY = 0.005, dragging = false, lx = 0, ly = 0;
+  camera.position.z = 7;
 
-  renderer.domElement.addEventListener("mousedown", e => {
-    dragging = true;
-    lx = e.clientX;
-    ly = e.clientY;
+  const light1 = new THREE.PointLight(0xffffff, 1);
+  light1.position.set(5,5,5);
+  scene.add(light1);
+  scene.add(new THREE.AmbientLight(0x404040));
+
+  let spinX=0, spinY=0.005, dragging=false, lx=0, ly=0;
+
+  renderer.domElement.addEventListener("mousedown", e=>{
+    dragging=true; lx=e.clientX; ly=e.clientY;
+  });
+  window.addEventListener("mouseup", ()=>dragging=false);
+  window.addEventListener("mousemove", e=>{
+    if(!dragging) return;
+    spinY=(e.clientX-lx)*0.005;
+    spinX=(e.clientY-ly)*0.005;
+    lx=e.clientX; ly=e.clientY;
   });
 
-  window.addEventListener("mouseup", () => dragging = false);
-
-  window.addEventListener("mousemove", e => {
-    if (!dragging) return;
-    spinY = (e.clientX - lx) * 0.005;
-    spinX = (e.clientY - ly) * 0.005;
-    lx = e.clientX;
-    ly = e.clientY;
+  const raycaster=new THREE.Raycaster();
+  const mouse=new THREE.Vector2();
+  renderer.domElement.addEventListener("click", e=>{
+    mouse.x=(e.clientX/renderer.domElement.clientWidth)*2-1;
+    mouse.y=-(e.clientY/renderer.domElement.clientHeight)*2+1;
+    raycaster.setFromCamera(mouse,camera);
+    const hit=raycaster.intersectObject(cube);
+    if(hit.length){
+      const face=Math.floor(hit[0].faceIndex/2);
+      showSection(labels[face].target);
+    }
   });
 
-  // Raycasting (FIXED)
-  const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2();
-
-  renderer.domElement.addEventListener("click", e => {
-    const rect = renderer.domElement.getBoundingClientRect();
-
-    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-    const hits = raycaster.intersectObject(cube);
-
-    if (!hits.length) return;
-
-    const faceIndex = Math.floor(hits[0].faceIndex / 2);
-    const targetPage = labels[faceIndex].page;
-
-    console.log("Opening:", targetPage);
-
-    window.location.href = `pages/${targetPage}`;
-  });
-
-  function animate() {
+  function animate(){
     requestAnimationFrame(animate);
-    cube.rotation.x += spinX;
-    cube.rotation.y += spinY;
-    renderer.render(scene, camera);
+    cube.rotation.x+=spinX;
+    cube.rotation.y+=spinY;
+    renderer.render(scene,camera);
   }
-
   animate();
 }
