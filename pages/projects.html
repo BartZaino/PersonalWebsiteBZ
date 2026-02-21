@@ -2,30 +2,35 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Projects | Bart Zaino</title>
 
-<!-- Correct: go up one folder -->
-<link rel="stylesheet" href="../css/main.css">
+<style>
+body { margin:0; font-family: Arial, sans-serif; background:#0b0b0b; color:#eee; }
+.wrapper { max-width:1000px; margin:auto; padding:60px 20px; }
+h1 { font-size:2.6rem; }
+.project { margin-top:30px; padding:20px; border-left:4px solid #40E0D0; background:#111; }
+.back-btn { margin-top:50px; display:inline-block; padding:10px 22px; border:2px solid #40E0D0; color:#40E0D0; text-decoration:none; }
+.back-btn:hover { background:#40E0D0; color:black; }
+</style>
 </head>
 
-<body class="page">
+<body>
+<div class="wrapper">
+<h1>Projects</h1>
+<p>Selected research, software, and creative works.</p>
 
-<header>
-  <h1>Projects</h1>
+<div class="project">
+  <h3>Cube Portfolio Interface</h3>
+  <p>Three.js interactive navigation system.</p>
+</div>
 
-  <!-- Correct: go back to root index -->
-  <a href="../index.html">← Back to Cube</a>
-</header>
+<div class="project">
+  <h3>Data Visualization Case Studies</h3>
+  <p>Actuarial and statistical modeling projects.</p>
+</div>
 
-<section class="card">
-  <h2>Interactive 3D Portfolio</h2>
-  <p>This website itself. Built with Three.js, JavaScript, and custom particle systems.</p>
-</section>
-
-<section class="card">
-  <h2>Actuarial Case Study Competition</h2>
-  <p>Pricing and reserving analysis project using actuarial methodologies.</p>
-</section>
-
+<a class="back-btn" href="../index.html">Return to Cube</a>
+</div>
 </body>
 </html>
